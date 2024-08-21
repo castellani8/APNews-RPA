@@ -126,7 +126,7 @@ class NewsScraper:
             opener.addheaders = [('User-agent', 'Mozilla/5.0')]
 
             urllib.request.install_opener(opener)
-            urllib.request.urlretrieve(img_url, 'output/images/'+img_name)
+            urllib.request.urlretrieve(img_url, 'output/'+img_name)
         except Exception as e:
             pass
 
