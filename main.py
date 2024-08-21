@@ -12,7 +12,7 @@ import zipfile
 import xlwt
 
 
-
+## ot-close-icon to close modal
 
 class NewsScraper:
     def __init__(self, search_phrase, category, months):
@@ -65,9 +65,9 @@ class NewsScraper:
             self.driver.find_element(By.XPATH, "//label[contains(span, '${category}')]/input[@type='checkbox']").click()
     
     def sort_by_recent(self):
-        element = self.driver.find_element(By.CSS_SELECTOR, 'div.otPcCenter.ot-fade-in')
-        self.driver.execute_script("arguments[0].remove();", element)
-        
+        time.sleep(2)
+        close_button = self.driver.find_element(By.CSS_SELECTOR, "button.ot-close-icon")
+        close_button.click()
         sort_by_select = self.driver.find_element(By.XPATH, '//select[@name="s"]')
         Select(sort_by_select).select_by_visible_text('Newest')
 
