@@ -145,7 +145,7 @@ class NewsScraper:
     def run(self):
         self.search_news()
         self.filter_by_category()
-        self.sort_by_recent()
+        # self.sort_by_recent()
         data = self.extract_data()
         self.save_to_file(data)
         self.driver.quit()
