@@ -10,9 +10,9 @@ import re
 import urllib.request
 import zipfile
 import xlwt
+from urllib.parse import unquote
 
 
-## ot-close-icon to close modal
 
 class NewsScraper:
     def __init__(self, search_phrase, category, months):
@@ -27,6 +27,7 @@ class NewsScraper:
         options.add_argument("--disable-gpu")
         options.add_argument('--disable-web-security')
         options.add_argument("--start-maximized")
+        options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36")
         # options.add_argument('--remote-debugging-port=9222')
         # options.add_experimental_option("excludeSwitches", ["enable-logging"])
 
@@ -85,7 +86,7 @@ class NewsScraper:
                 if img_element:
                     try:
                         img_url = img_element.get_attribute("srcset").split(',')[0].strip().split(' ')[0]
-                        img_name = os.path.join(self.output_dir, os.path.basename(img_url))
+                        img_name = title + '.jpg'
                         self.download_image(img_url, img_name)
                     except (IndexError, AttributeError):
                         pass
@@ -107,8 +108,8 @@ class NewsScraper:
 
             data.append({
                 'title': title,
-                'date': date,
                 'description': description,
+                'date': date,
                 'image_file': img_name,
                 'phrase_count': count_phrase,
                 'contains_money': contains_money
@@ -118,9 +119,16 @@ class NewsScraper:
 
     def download_image(self, img_url, img_name):
         try:
-            urllib.request.urlretrieve(img_url, img_name)
+            if not os.path.exists('output/images'):
+                os.makedirs('output/images')
+
+            opener = urllib.request.build_opener()
+            opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+
+            urllib.request.install_opener(opener)
+            urllib.request.urlretrieve(img_url, 'output/images/'+img_name)
         except Exception as e:
-            print(f"Error downloading {img_url}: {e}")
+            pass
 
     def save_to_file(self, data):
         output_file = os.path.join(self.output_dir, "news_data.xls")
