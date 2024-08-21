@@ -65,6 +65,9 @@ class NewsScraper:
             self.driver.find_element(By.XPATH, "//label[contains(span, '${category}')]/input[@type='checkbox']").click()
     
     def sort_by_recent(self):
+        element = self.driver.find_element(By.CSS_SELECTOR, 'div.otPcCenter.ot-fade-in')
+        self.driver.execute_script("arguments[0].remove();", element)
+        
         sort_by_select = self.driver.find_element(By.XPATH, '//select[@name="s"]')
         Select(sort_by_select).select_by_visible_text('Newest')
 
