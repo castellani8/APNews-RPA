@@ -8,18 +8,18 @@ import os
 import time
 import re
 import urllib.request
-import zipfile
 import xlwt
 from urllib.parse import unquote
-
+from RPA.Robocorp.WorkItems import WorkItems
 
 
 class NewsScraper:
-    def __init__(self, search_phrase, category, months):
-        self.search_phrase = search_phrase
-        self.category = category
-        self.months = months
-
+    def __init__(self):
+        wi = WorkItems()
+        wi.get_input_work_item()
+        self.search_phrase = wi.get_work_item_variable('search_phrase')
+        self.category = wi.get_work_item_variable('category')
+        
         options = webdriver.FirefoxOptions()
         options.add_argument('--headless')
         options.add_argument('--no-sandbox')
@@ -28,10 +28,8 @@ class NewsScraper:
         options.add_argument('--disable-web-security')
         options.add_argument("--start-maximized")
         options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36")
-        # options.add_argument('--remote-debugging-port=9222')
-        # options.add_experimental_option("excludeSwitches", ["enable-logging"])
-
         self.driver = webdriver.Firefox(options=options)
+        
         self.output_dir = "output"
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
@@ -127,7 +125,7 @@ class NewsScraper:
 
             urllib.request.install_opener(opener)
             urllib.request.urlretrieve(img_url, 'output/'+img_name)
-        except Exception as e:
+        except:
             pass
 
     def save_to_file(self, data):
@@ -159,5 +157,5 @@ class NewsScraper:
         self.driver.quit()
 
 if __name__ == "__main__":
-    scraper = NewsScraper("Brazil", "Stories", 1)
+    scraper = NewsScraper()
     scraper.run()
