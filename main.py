@@ -18,7 +18,7 @@ class NewsScraper:
         wi = WorkItems()
         wi.get_input_work_item()
         self.search_phrase = wi.get_work_item_variable('search_phrase')
-        self.category = wi.get_work_item_variable('category')
+        # self.category = wi.get_work_item_variable('category')
         
         options = webdriver.FirefoxOptions()
         options.add_argument('--headless')
@@ -150,7 +150,7 @@ class NewsScraper:
     
     def run(self):
         self.search_news()
-        self.filter_by_category()
+        # self.filter_by_category()
         # self.sort_by_recent()
         data = self.extract_data()
         self.save_to_file(data)
