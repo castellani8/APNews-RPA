@@ -18,6 +18,7 @@ class NewsScraper:
         wi = WorkItems()
         wi.get_input_work_item()
         self.search_phrase = wi.get_work_item_variable('search_phrase')
+        # self.search_phrase = 'Amazon'
         # self.category = wi.get_work_item_variable('category')
         
         options = webdriver.FirefoxOptions()
@@ -27,11 +28,7 @@ class NewsScraper:
         options.add_argument("--disable-gpu")
         options.add_argument('--disable-web-security')
         options.add_argument("--start-maximized")
-        options.add_argument(
-            "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/104.0.0.0 Safari/537.36"
-        )        
+        options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36")
         self.driver = webdriver.Firefox(options=options)
         
         self.output_dir = "output"
@@ -60,42 +57,37 @@ class NewsScraper:
 
             try:
                 WebDriverWait(self.driver, 5).until(
-                    EC.presence_of_element_located(
-                        (By.XPATH, "//label[contains(span, '${category}')]/input[@type='checkbox']")
-                    )
+                    EC.presence_of_element_located((By.XPATH, "//label[contains(span, '${category}')]/input[@type='checkbox']"))
                 )
             except:
                 return
         
-            self.driver.find_element(
-                By.XPATH, 
-                "//label[contains(span, '${category}')]/input[@type='checkbox']"
-            ).click()
+            self.driver.find_element(By.XPATH, "//label[contains(span, '${category}')]/input[@type='checkbox']").click()
     
     def sort_by_recent(self):
         time.sleep(2)
-        close_button = self.driver.find_element(By.CSS_SELECTOR, "button.ot-close-icon")
-        close_button.click()
-        sort_by_select = self.driver.find_element(By.XPATH, '//select[@name="s"]')
-        Select(sort_by_select).select_by_visible_text('Newest')
+        current_url = self.driver.current_url
+        current_url = current_url.split("#nt=navsearch")[0]
+        new_url = f"{current_url}&s=3"
+        self.driver.get(new_url)
+
+        ### Had a popup problem
+        # close_button = self.driver.find_element(By.CSS_SELECTOR, "button.ot-close-icon")
+        # close_button.click()
+        # sort_by_select = self.driver.find_element(By.XPATH, '//select[@name="s"]')
+        # Select(sort_by_select).select_by_visible_text('Newest')
 
     def extract_data(self):
-        self.driver.refresh()
-        articles = self.driver.find_elements(
-            By.CSS_SELECTOR, 
-            ".SearchResultsModule-results .PageList-items-item"
-        )
-
+        time.sleep(2)
+        articles = self.driver.find_elements(By.CSS_SELECTOR, ".SearchResultsModule-results .PageList-items-item")
         data = []
+
         count = 1
         for article in articles:
             title = article.find_element(By.CSS_SELECTOR, " .PagePromo-title span").text
 
             try:
-                img_element = self.driver.find_element(
-                    By.CSS_SELECTOR, 
-                    f".PageList-items .PageList-items-item:nth-of-type({count}) .PagePromo-media a picture img"
-                )
+                img_element = self.driver.find_element(By.CSS_SELECTOR, f".PageList-items .PageList-items-item:nth-of-type({count}) .PagePromo-media a picture img")
                 if img_element:
                     try:
                         img_url = img_element.get_attribute("srcset").split(',')[0].strip().split(' ')[0]
@@ -107,18 +99,12 @@ class NewsScraper:
                 img_name = ""
             
             try:
-                description = article.find_element(
-                    By.CSS_SELECTOR, 
-                    ".PagePromo-description a span"
-                ).text
+                description = article.find_element(By.CSS_SELECTOR, ".PagePromo-description a span").text
             except NoSuchElementException:
                 description = ""
 
             try:
-                date = self.driver.find_element(
-                    By.CSS_SELECTOR, 
-                    f".PageList-items .PageList-items-item:nth-of-type({count}) .PagePromo-date span span"
-                ).text
+                date = self.driver.find_element(By.CSS_SELECTOR, f".PageList-items .PageList-items-item:nth-of-type({count}) .PagePromo-date span span").text
             except NoSuchElementException:
                 date = ""
 
@@ -138,9 +124,6 @@ class NewsScraper:
 
     def download_image(self, img_url, img_name):
         try:
-            if not os.path.exists('output/images'):
-                os.makedirs('output/images')
-
             opener = urllib.request.build_opener()
             opener.addheaders = [('User-agent', 'Mozilla/5.0')]
 
@@ -172,7 +155,7 @@ class NewsScraper:
     def run(self):
         self.search_news()
         # self.filter_by_category()
-        # self.sort_by_recent()
+        self.sort_by_recent()
         data = self.extract_data()
         self.save_to_file(data)
         self.driver.quit()
