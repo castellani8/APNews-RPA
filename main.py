@@ -27,7 +27,11 @@ class NewsScraper:
         options.add_argument("--disable-gpu")
         options.add_argument('--disable-web-security')
         options.add_argument("--start-maximized")
-        options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36")
+        options.add_argument(
+            "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/104.0.0.0 Safari/537.36"
+        )        
         self.driver = webdriver.Firefox(options=options)
         
         self.output_dir = "output"
@@ -56,12 +60,17 @@ class NewsScraper:
 
             try:
                 WebDriverWait(self.driver, 5).until(
-                    EC.presence_of_element_located((By.XPATH, "//label[contains(span, '${category}')]/input[@type='checkbox']"))
+                    EC.presence_of_element_located(
+                        (By.XPATH, "//label[contains(span, '${category}')]/input[@type='checkbox']")
+                    )
                 )
             except:
                 return
         
-            self.driver.find_element(By.XPATH, "//label[contains(span, '${category}')]/input[@type='checkbox']").click()
+            self.driver.find_element(
+                By.XPATH, 
+                "//label[contains(span, '${category}')]/input[@type='checkbox']"
+            ).click()
     
     def sort_by_recent(self):
         time.sleep(2)
@@ -72,15 +81,21 @@ class NewsScraper:
 
     def extract_data(self):
         self.driver.refresh()
-        articles = self.driver.find_elements(By.CSS_SELECTOR, ".SearchResultsModule-results .PageList-items-item")
-        data = []
+        articles = self.driver.find_elements(
+            By.CSS_SELECTOR, 
+            ".SearchResultsModule-results .PageList-items-item"
+        )
 
+        data = []
         count = 1
         for article in articles:
             title = article.find_element(By.CSS_SELECTOR, " .PagePromo-title span").text
 
             try:
-                img_element = self.driver.find_element(By.CSS_SELECTOR, f".PageList-items .PageList-items-item:nth-of-type({count}) .PagePromo-media a picture img")
+                img_element = self.driver.find_element(
+                    By.CSS_SELECTOR, 
+                    f".PageList-items .PageList-items-item:nth-of-type({count}) .PagePromo-media a picture img"
+                )
                 if img_element:
                     try:
                         img_url = img_element.get_attribute("srcset").split(',')[0].strip().split(' ')[0]
@@ -92,12 +107,18 @@ class NewsScraper:
                 img_name = ""
             
             try:
-                description = article.find_element(By.CSS_SELECTOR, ".PagePromo-description a span").text
+                description = article.find_element(
+                    By.CSS_SELECTOR, 
+                    ".PagePromo-description a span"
+                ).text
             except NoSuchElementException:
                 description = ""
 
             try:
-                date = self.driver.find_element(By.CSS_SELECTOR, f".PageList-items .PageList-items-item:nth-of-type({count}) .PagePromo-date span span").text
+                date = self.driver.find_element(
+                    By.CSS_SELECTOR, 
+                    f".PageList-items .PageList-items-item:nth-of-type({count}) .PagePromo-date span span"
+                ).text
             except NoSuchElementException:
                 date = ""
 
